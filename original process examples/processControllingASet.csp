@@ -1,0 +1,57 @@
+value = {0..5}
+
+channel in, out, new, error: value
+
+P1(set) =
+	(
+		in?x:set ->
+	--	error!x ->
+		P1(set)
+	)
+	[]
+	(
+		in?x:diff(value,set) ->
+	--	new.x ->
+		P1(union(set, {x}))
+	)
+	[]
+	(
+		out?x:set ->
+		P1(diff(set,{x}))
+	)
+
+assert P1({}) :[deadlock free [F]]
+
+P2 = ||| x : value @ NotMember(x)
+
+NotMember(x) =
+	in.x ->
+--	new.x ->
+	Member(x)
+
+Member(x) =
+(
+	in.x ->
+--	error.x ->
+	Member(x)
+)
+[]
+(
+	out.x ->
+	NotMember(x)
+)
+
+
+
+
+assert P2 :[deadlock free [F]]
+
+assert P1({}) [T= P2
+assert P2 [T= P1({})
+
+assert P1({}) [F= P2
+assert P2 [F= P1({})
+
+
+assert P1({}) [FD= P2
+assert P2 [FD= P1({})

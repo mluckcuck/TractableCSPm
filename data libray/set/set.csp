@@ -1,0 +1,27 @@
+
+module SET(setType)
+  channel in, out, new, error: setType
+
+  NotMember(x) =
+  	in.x ->
+  --	new.x ->
+  	Member(x)
+
+  Member(x) =
+  (
+  	in.x ->
+  --	error.x ->
+  	Member(x)
+  )
+  []
+  (
+  	out.x ->
+  	NotMember(x)
+  )
+exports
+  tSet = ||| x : setType @ NotMember(x)
+endmodule
+
+
+instance mySet = SET({0..20})
+assert mySet::tSet :[deadlock free [F]]

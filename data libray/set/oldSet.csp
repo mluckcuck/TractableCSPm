@@ -1,0 +1,23 @@
+include "../common.csp"
+
+channel in, out, new, error: value
+
+P1(set) =
+	(
+		in?x:set ->
+	--	error!x ->
+		P1(set)
+	)
+	[]
+	(
+		in?x:diff(value,set) ->
+	--	new.x ->
+		P1(union(set, {x}))
+	)
+	[]
+	(
+		out?x:set ->
+		P1(diff(set,{x}))
+	)
+
+assert P1({}) :[deadlock free [F]]

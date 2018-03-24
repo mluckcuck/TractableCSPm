@@ -1,0 +1,43 @@
+value = {0..5}
+
+minStackId = 0
+maxStackId = 5
+
+channel push, top, error: value
+channel pop
+
+Q1(sequence) =
+{-if 	sequence == <0> then
+	(
+		push?x ->
+		P(sequence^<x>)
+	)
+	[]
+	(
+		top!head(sequence) ->
+		P(sequence)
+	)
+else -}
+	(#sequence < maxStackId)&
+	(
+		push?x ->
+		Q1(<x>^sequence)
+	)
+	[]
+	(
+	(not null(sequence)) &
+	(
+			(
+				pop ->
+				Q1(tail(sequence))
+			)
+			[]
+			(
+				top!head(sequence) ->
+				Q1(sequence)
+			)
+		)
+	)
+
+
+assert Q1(<>) :[deadlock free [F]]

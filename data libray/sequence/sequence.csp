@@ -1,0 +1,49 @@
+
+
+module SEQUENCE(seqType, stackLimit)
+
+  minStackId = 0
+  maxStackId = stackLimit
+
+  ID = {minStackId..maxStackId}
+
+  channel push, top : ID.seqType
+  channel pop, resume,  error: seqType
+
+  Free(id) =
+  	push.id?v -> Full(id, v)
+
+  Full(id, v) =
+  	--(id > 0)&
+  	pop.id->
+  	(
+  		if id > minStackId then
+  			resume.id-1 -> Free(id)
+  		else
+  			Free(id)
+  	)
+  	[]
+  	(id < maxStackId-1 )&
+  		push.id+1?_ -> resume.id -> Full(id, v)
+  	[]
+  	top.id!v -> Full(id, v)
+
+  AlphaFree(id) =
+  	Union ({
+  				{| push.id,pop.id, resume.id, top.id |},
+  				{| push.id+1 | id<maxStackId  |},
+  				{| resume.id-1 | id > minStackId  |}
+  			})
+exports
+  tSeq =
+  (
+    (
+    	(	|| i : seqType @ [ AlphaFree(i) ] Free(i)
+    	)
+    ) \ {| resume|}
+  )
+endmodule
+
+instance mySeq = SEQUENCE({0..7}, 7)
+
+assert mySeq::tSeq :[deadlock free [F]]
