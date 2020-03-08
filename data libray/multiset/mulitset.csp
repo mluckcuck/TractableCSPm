@@ -1,0 +1,27 @@
+
+module MULTISET(setType)
+  channel in, out, new, error: setType
+
+  NotMember(x) =
+  	in.x ->
+  --	new.x ->
+  	Member(x)
+
+  Member(x) =
+  (
+  	in.x ->
+  --	error.x ->
+  	Member(x)
+  )
+  []
+  (
+  	out.x ->
+  	NotMember(x)
+  )
+exports
+  tMSet = ||| x : setType @ NotMember(x)
+endmodule
+
+
+instance myMSet = MULTISET({0..20})
+assert myMSet::tMSet :[deadlock free [F]]

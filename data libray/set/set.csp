@@ -1,27 +1,48 @@
 
 module SET(setType)
-  channel in, out, new, error: setType
+  channel add, remove, new, error: setType
+  channel isEmpty: Bool
+
+  SetInterfaceAlpha = {| add, remove, isEmpty |}
+  SetControlAlpha = {| cellEmpty |}
 
   NotMember(x) =
-  	in.x ->
+    isEmpty.True -> NotMember(x)
+    []
+    isEmpty.False -> NotMember(x)
+    []
+  	add.x ->
   --	new.x ->
   	Member(x)
 
   Member(x) =
-  (
-  	in.x ->
+--  (
+--  	add.x ->
   --	error.x ->
-  	Member(x)
-  )
+--  	Member(x)
+--  )
+--  []
+  isEmpty.False -> Member(x)
   []
   (
-  	out.x ->
+  	remove.x ->
   	NotMember(x)
   )
+
+
+  Control(setEmpty) =
+    isEmpty.setEmpty -> Control(setEmpty)
+    []
+    add?_ -> Control(False)
+    []
+    remove?_ -> (isEmpty.True -> Control(True) [] isEmpty.False -> Control(False))
+
+
+
 exports
-  tSet = ||| x : setType @ NotMember(x)
+  tSet = ([| SetControlAlpha |] x : setType @ NotMember(x)) [| SetInterfaceAlpha |] Control(True)
 endmodule
 
 
-instance mySet = SET({0..20})
+instance mySet = SET({0..1})
 assert mySet::tSet :[deadlock free [F]]
